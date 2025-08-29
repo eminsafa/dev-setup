@@ -1,36 +1,27 @@
 #!/bin/bash
 
-# Exit if any command fails
 set -e
 
 # Variables
-FIREFOX_URL="https://download.mozilla.org/?product=firefox-latest&os=linux64-aarch64&lang=en-US"
+FIREFOX_URL="https://ftp.mozilla.org/pub/firefox/releases/latest/linux-aarch64/en-US/firefox-*.tar.bz2"
 TMP_DIR="/tmp/firefox-install"
 INSTALL_DIR="/opt/firefox"
 
-# Create temporary directory
 mkdir -p $TMP_DIR
 cd $TMP_DIR
 
-# Download latest Firefox ARM64
-echo "Downloading latest Firefox for ARM64..."
+echo "Downloading Firefox ARM64..."
 wget -O firefox.tar.bz2 "$FIREFOX_URL"
 
-# Remove old installation if exists
-if [ -d "$INSTALL_DIR" ]; then
-    echo "Removing old Firefox installation..."
-    sudo rm -rf "$INSTALL_DIR"
-fi
+echo "Removing old installation if exists..."
+sudo rm -rf "$INSTALL_DIR"
 
-# Extract to /opt
 echo "Extracting Firefox..."
 sudo tar -xjf firefox.tar.bz2 -C /opt
 
-# Create symlink
 echo "Creating symlink..."
 sudo ln -sf /opt/firefox/firefox /usr/local/bin/firefox
 
-# Cleanup
 cd ~
 rm -rf $TMP_DIR
 

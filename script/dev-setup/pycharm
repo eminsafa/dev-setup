@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Ask for PyCharm version
+read -p "Enter the PyCharm version (e.g., 2025.1): " version
+
+# Set the filename
+filename="pycharm-$version.tar.gz"
+install_dir="/opt/pycharm-$version"
+
+# Check if the file exists
+if [[ ! -f $filename ]]; then
+    echo "File $filename not found in current directory."
+    exit 1
+fi
+
+# Extract the tar.gz file
+echo "Extracting $filename to /opt..."
+sudo tar -xzf "$filename" -C /opt
+
+# Create desktop entry
+desktop_file="/usr/share/applications/pycharm.desktop"
+echo "Creating desktop entry at $desktop_file..."
+sudo tee "$desktop_file" > /dev/null <<EOL
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=PyCharm
+Icon=$install_dir/bin/pycharm.png
+Exec=$install_dir/bin/pycharm %f
+Comment=Python IDE by JetBrains
+Categories=Development;IDE;
+Terminal=false
+StartupWMClass=jetbrains-pycharm
+EOL
+
+# Update desktop database
+echo "Updating desktop database..."
+sudo update-desktop-database
+
+echo "PyCharm $version installation completed!"

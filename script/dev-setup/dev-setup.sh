@@ -1,28 +1,5 @@
 #!/bin/bash
-set -e
 
-echo "Updating package list..."
-sudo apt update && sudo apt upgrade -y
-
-# --- Install Terminator ---
-echo "Installing Terminator..."
-sudo apt install -y terminator
-
-# --- Install VS Code ---
-echo "Installing Visual Studio Code..."
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
-sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
-rm -f packages.microsoft.gpg
-sudo apt update
-sudo apt install -y code
-
-# --- Install PyCharm (Community Edition) ---
-echo "Installing PyCharm Community Edition..."
-sudo snap install pycharm-community --classic
-
-# (Optional: Professional version)
-# sudo snap install pycharm-professional --classic
 
 # --- Setup SSH Keys for GitHub ---
 echo "Setting up SSH keys for GitHub..."
@@ -49,10 +26,18 @@ qKeJghtrE5/jzWsmf3reK4ZyYPgaKd7xCNbkgyhU4aQ+d9P8D286LnZhN6CP1yrw
 EOF
 )
 
-private_key=$(echo "$encrypted_private_key" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 500000 -k "$passphrase" 2>/dev/null)
-echo "$private_key" > ~/.ssh/est_ssh_key
+read -p "Enter passphrase: " passphrase
+echo
 
-public_key=$(echo "$encrypted_public_key" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 500000 -k "$passphrase" 2>/dev/null)
+private_key=$(echo "$private_key_encrypted" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 500000 -k "$passphrase" 2>/dev/null)
+public_key=$(echo "$public_key_encrypted" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 500000 -k "$passphrase" 2>/dev/null)
+
+
+echo "Private Key: $private_key"
+echo "Public Key: $public_key"
+
+
+echo "$private_key" > ~/.ssh/est_ssh_key
 echo "$public_key" > ~/.ssh/est_ssh_key.pub
 
 chmod 600 ~/.ssh/est_ssh_key
@@ -73,5 +58,8 @@ chmod 600 ~/.ssh/config
 # --- Test GitHub SSH connection ---
 echo "Testing GitHub SSH connection..."
 ssh -T git@github.com || true
+
+git config --global user.email "esafa.tok@gmail.com"
+git config --global user.name "eminsafa (orin)"
 
 echo "All done! Installed: Terminator, VS Code, PyCharm, and GitHub SSH setup."
